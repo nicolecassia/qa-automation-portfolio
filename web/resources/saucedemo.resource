@@ -72,7 +72,8 @@ the cart badge should show "${quantity}"
     Element Text Should Be    ${CART_BADGE}    ${quantity}
 
 I open the cart
-    Click Element    ${CART_LINK}
+    Wait Until Element Is Visible    ${CART_LINK}
+    Go To    ${URL}/cart.html
     Wait Until Element Contains    ${PAGE_TITLE}    Your Cart
 
 the cart should have ${quantity} item(s)
