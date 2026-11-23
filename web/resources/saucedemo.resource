@@ -1,5 +1,8 @@
 *** Settings ***
 Documentation     Keywords e localizadores da aplicação SauceDemo (https://www.saucedemo.com).
+...               O site é uma aplicação React: logo após cada navegação, a página aparece
+...               antes de estar pronta para receber cliques e digitação. Por isso as ações
+...               importantes confirmam o resultado e tentam de novo se ele não acontecer.
 Library           SeleniumLibrary
 
 
@@ -7,9 +10,6 @@ Library           SeleniumLibrary
 ${URL}                 https://www.saucedemo.com
 ${BROWSER}             chrome
 ${TIMEOUT}             10s
-# Desliga o gerenciador de senhas do Chrome: o aviso de "senha vazada" abre um pop-up
-# que rouba o foco dos campos e faz o checkout falhar de forma intermitente.
-${CHROME_OPTIONS}      add_argument("--disable-features=PasswordLeakDetection");add_experimental_option("prefs", {"credentials_enable_service": False, "profile.password_manager_enabled": False, "profile.password_manager_leak_detection": False})
 
 ${VALID_USER}          standard_user
 ${LOCKED_USER}         locked_out_user
@@ -28,7 +28,6 @@ ${CART_LINK}           css=.shopping_cart_link
 ${CART_ITEM}           css=.cart_item
 
 # Checkout
-${BTN_CHECKOUT}        id=checkout
 ${INPUT_FIRST_NAME}    id=first-name
 ${INPUT_LAST_NAME}     id=last-name
 ${INPUT_POSTAL_CODE}   id=postal-code
@@ -69,10 +68,16 @@ I am logged in as a standard user
 
 # ---------- Carrinho ----------
 I add the product "${product_id}" to the cart
-    Click Button    id=add-to-cart-${product_id}
+    Wait Until Keyword Succeeds    5x    1s    Add product and confirm    ${product_id}
+
+Add product and confirm
+    [Arguments]    ${product_id}
+    ${already_added}=    Get Element Count    id=remove-${product_id}
+    IF    ${already_added} == 0    Click Button    id=add-to-cart-${product_id}
+    Wait Until Page Contains Element    id=remove-${product_id}    timeout=3s
 
 the cart badge should show "${quantity}"
-    Element Text Should Be    ${CART_BADGE}    ${quantity}
+    Wait Until Element Contains    ${CART_BADGE}    ${quantity}
 
 I open the cart
     Wait Until Element Is Visible    ${CART_LINK}
@@ -80,17 +85,22 @@ I open the cart
     Wait Until Element Contains    ${PAGE_TITLE}    Your Cart
 
 the cart should have ${quantity} item(s)
-    Page Should Contain Element    ${CART_ITEM}    limit=${quantity}
+    Wait Until Page Contains Element    ${CART_ITEM}    limit=${quantity}
 
+# ---------- Checkout ----------
 I fill the checkout form with "${first}" "${last}" "${zip}"
     Go To    ${URL}/checkout-step-one.html
     Wait Until Element Is Visible    ${INPUT_FIRST_NAME}
-    Input Text       ${INPUT_FIRST_NAME}    ${first}
-    Input Text       ${INPUT_LAST_NAME}     ${last}
-    Input Text       ${INPUT_POSTAL_CODE}   ${zip}
-    Wait Until Keyword Succeeds    3x    1s    I continue to the order overview
+    Wait Until Keyword Succeeds    5x    1s    Fill form and continue    ${first}    ${last}    ${zip}
 
-I continue to the order overview
+Fill form and continue
+    [Arguments]    ${first}    ${last}    ${zip}
+    Input Text    ${INPUT_FIRST_NAME}     ${first}
+    Input Text    ${INPUT_LAST_NAME}      ${last}
+    Input Text    ${INPUT_POSTAL_CODE}    ${zip}
+    Textfield Value Should Be    ${INPUT_FIRST_NAME}     ${first}
+    Textfield Value Should Be    ${INPUT_LAST_NAME}      ${last}
+    Textfield Value Should Be    ${INPUT_POSTAL_CODE}    ${zip}
     Click Button    ${BTN_CONTINUE}
     Wait Until Element Is Visible    ${BTN_FINISH}    timeout=3s
 
