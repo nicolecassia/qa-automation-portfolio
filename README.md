@@ -83,4 +83,4 @@ A cada *push* na `main` o GitHub Actions roda as duas suítes. Os relatórios fi
 
 ## Contato
 
-[LinkedIn](https://www.linkedin.com/in/SEU_PERFIL)
+[LinkedIn](https://www.linkedin.com/in/nicole-cassia/)
