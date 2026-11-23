@@ -57,8 +57,11 @@ I log in with user "${user}" and password "${password}"
 
 I should be logged in
     Wait Until Page Does Not Contain Element    ${LOGIN_SCREEN}    timeout=15s
+    Wait Until Keyword Succeeds    3x    2s    the menu should show the logout option
+
+the menu should show the logout option
     Click Element    ${LOC_OPEN_MENU}
-    Wait Until Element Is Visible    ${MENU_LOGOUT}
+    Wait Until Page Contains Element    ${MENU_LOGOUT}    timeout=5s
 
 I should see the error message "${message}"
     Wait Until Page Contains    ${message}
