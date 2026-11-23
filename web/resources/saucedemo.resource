@@ -7,6 +7,9 @@ Library           SeleniumLibrary
 ${URL}                 https://www.saucedemo.com
 ${BROWSER}             chrome
 ${TIMEOUT}             10s
+# Desliga o gerenciador de senhas do Chrome: o aviso de "senha vazada" abre um pop-up
+# que rouba o foco dos campos e faz o checkout falhar de forma intermitente.
+${CHROME_OPTIONS}      add_argument("--disable-features=PasswordLeakDetection");add_experimental_option("prefs", {"credentials_enable_service": False, "profile.password_manager_enabled": False, "profile.password_manager_leak_detection": False})
 
 ${VALID_USER}          standard_user
 ${LOCKED_USER}         locked_out_user
