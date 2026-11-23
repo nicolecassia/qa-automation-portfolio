@@ -85,7 +85,11 @@ I fill the checkout form with "${first}" "${last}" "${zip}"
     Input Text       ${INPUT_FIRST_NAME}    ${first}
     Input Text       ${INPUT_LAST_NAME}     ${last}
     Input Text       ${INPUT_POSTAL_CODE}   ${zip}
-    Click Button     ${BTN_CONTINUE}
+    Wait Until Keyword Succeeds    3x    1s    I continue to the order overview
+
+I continue to the order overview
+    Click Button    ${BTN_CONTINUE}
+    Wait Until Element Is Visible    ${BTN_FINISH}    timeout=3s
 
 I finish the order
     Wait Until Element Is Visible    ${BTN_FINISH}
