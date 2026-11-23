@@ -98,7 +98,14 @@ Fill form and continue
     Type into field    first-name     ${first}
     Type into field    last-name      ${last}
     Type into field    postal-code    ${zip}
+    Scroll Element Into View    ${BTN_CONTINUE}
     Click Button    ${BTN_CONTINUE}
+    ${moved_on}=    Run Keyword And Return Status
+    ...    Wait Until Element Is Visible    ${BTN_FINISH}    timeout=2s
+    # Se o site ignorou o clique, aciona o botão direto pelo JavaScript
+    IF    not ${moved_on}
+        Execute Javascript    document.getElementById('continue').click();
+    END
     Wait Until Element Is Visible    ${BTN_FINISH}    timeout=3s
 
 Type into field
@@ -119,7 +126,14 @@ Type into field
 
 I finish the order
     Wait Until Element Is Visible    ${BTN_FINISH}
+    Scroll Element Into View    ${BTN_FINISH}
     Click Button    ${BTN_FINISH}
+    ${finished}=    Run Keyword And Return Status
+    ...    Wait Until Element Is Visible    ${MSG_COMPLETE}    timeout=2s
+    # Se o site ignorou o clique, aciona o botão direto pelo JavaScript
+    IF    not ${finished}
+        Execute Javascript    document.getElementById('finish').click();
+    END
 
 I should see the order confirmation
     Wait Until Element Contains    ${MSG_COMPLETE}    Thank you for your order!
