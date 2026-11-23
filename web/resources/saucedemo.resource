@@ -79,15 +79,16 @@ I open the cart
 the cart should have ${quantity} item(s)
     Page Should Contain Element    ${CART_ITEM}    limit=${quantity}
 
-# ---------- Checkout ----------
 I fill the checkout form with "${first}" "${last}" "${zip}"
-    Click Button     ${BTN_CHECKOUT}
+    Go To    ${URL}/checkout-step-one.html
+    Wait Until Element Is Visible    ${INPUT_FIRST_NAME}
     Input Text       ${INPUT_FIRST_NAME}    ${first}
     Input Text       ${INPUT_LAST_NAME}     ${last}
     Input Text       ${INPUT_POSTAL_CODE}   ${zip}
     Click Button     ${BTN_CONTINUE}
 
 I finish the order
+    Wait Until Element Is Visible    ${BTN_FINISH}
     Click Button    ${BTN_FINISH}
 
 I should see the order confirmation
