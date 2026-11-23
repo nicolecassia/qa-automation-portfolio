@@ -95,14 +95,27 @@ I fill the checkout form with "${first}" "${last}" "${zip}"
 
 Fill form and continue
     [Arguments]    ${first}    ${last}    ${zip}
-    Input Text    ${INPUT_FIRST_NAME}     ${first}
-    Input Text    ${INPUT_LAST_NAME}      ${last}
-    Input Text    ${INPUT_POSTAL_CODE}    ${zip}
-    Textfield Value Should Be    ${INPUT_FIRST_NAME}     ${first}
-    Textfield Value Should Be    ${INPUT_LAST_NAME}      ${last}
-    Textfield Value Should Be    ${INPUT_POSTAL_CODE}    ${zip}
+    Type into field    first-name     ${first}
+    Type into field    last-name      ${last}
+    Type into field    postal-code    ${zip}
     Click Button    ${BTN_CONTINUE}
     Wait Until Element Is Visible    ${BTN_FINISH}    timeout=3s
+
+Type into field
+    [Documentation]    Digita no campo e confere. Se o React descartar o texto digitado,
+    ...                preenche via JavaScript disparando o evento "input" que o React escuta.
+    [Arguments]    ${field_id}    ${text}
+    Input Text    id=${field_id}    ${text}
+    ${value}=    Get Value    id=${field_id}
+    IF    $value != $text
+        Execute Javascript
+        ...    const el = document.getElementById(arguments[0]);
+        ...    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+        ...    setter.call(el, arguments[1]);
+        ...    el.dispatchEvent(new Event('input', { bubbles: true }));
+        ...    ARGUMENTS    ${field_id}    ${text}
+    END
+    Textfield Value Should Be    id=${field_id}    ${text}
 
 I finish the order
     Wait Until Element Is Visible    ${BTN_FINISH}
