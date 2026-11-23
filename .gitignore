@@ -9,3 +9,8 @@ output.xml
 log.html
 report.html
 selenium-screenshot-*.png
+
+# Apps mobile (baixados, não versionados)
+mobile/apps/*
+!mobile/apps/.gitkeep
+appium.log

@@ -1,0 +1,90 @@
+name: Testes mobile
+
+# Roda manualmente: aba Actions > Testes mobile > Run workflow
+on:
+  workflow_dispatch:
+
+env:
+  APP_RELEASE: https://github.com/saucelabs/my-demo-app-rn/releases/download/v1.3.0
+  GLOBAL_DEFAULT_TIMEOUT: "600"
+
+jobs:
+  android:
+    name: Android (Robot Framework + Appium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements.txt
+          npm install -g appium
+          appium driver install uiautomator2
+      - name: Baixar o app
+        run: curl -L -o mobile/apps/MyDemoAppRN.apk "$APP_RELEASE/Android-MyDemoAppRN.1.3.0.build-244.apk"
+      - name: Habilitar aceleração do emulador (KVM)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Iniciar Appium
+        run: nohup appium --log appium.log > /dev/null 2>&1 &
+      - name: Executar testes no emulador Android
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: robot -d results/android -V mobile/config/android.py mobile/tests
+      - name: Publicar relatório
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: relatorio-android
+          path: |
+            results/
+            appium.log
+
+  ios:
+    name: iOS (Robot Framework + Appium)
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements.txt
+          npm install -g appium
+          appium driver install xcuitest
+      - name: Baixar o app
+        run: |
+          curl -L -o ios-app.zip "$APP_RELEASE/iOS-Simulator-MyRNDemoApp.1.3.0-162.zip"
+          unzip -q ios-app.zip -d mobile/apps
+      - name: Simuladores disponíveis
+        run: xcrun simctl list devices available
+      - name: Iniciar Appium
+        run: nohup appium --log appium.log > /dev/null 2>&1 &
+      - name: Executar testes no simulador iOS
+        run: robot -d results/ios -V mobile/config/ios.py mobile/tests
+      - name: Publicar relatório
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: relatorio-ios
+          path: |
+            results/
+            appium.log
