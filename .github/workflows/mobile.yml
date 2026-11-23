@@ -33,8 +33,14 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Iniciar Appium
-        run: nohup appium --log appium.log > /dev/null 2>&1 &
+           - name: Iniciar Appium
+        run: |
+          nohup appium --log appium.log > /dev/null 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:4723/status > /dev/null; then echo "Appium pronto"; exit 0; fi
+            sleep 2
+          done
+          echo "Appium nao iniciou"; cat appium.log; exit 1
       - name: Executar testes no emulador Android
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -76,8 +82,14 @@ jobs:
           unzip -q ios-app.zip -d mobile/apps
       - name: Simuladores disponíveis
         run: xcrun simctl list devices available
-      - name: Iniciar Appium
-        run: nohup appium --log appium.log > /dev/null 2>&1 &
+           - name: Iniciar Appium
+        run: |
+          nohup appium --log appium.log > /dev/null 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:4723/status > /dev/null; then echo "Appium pronto"; exit 0; fi
+            sleep 2
+          done
+          echo "Appium nao iniciou"; cat appium.log; exit 1
       - name: Executar testes no simulador iOS
         run: robot -d results/ios -V mobile/config/ios.py mobile/tests
       - name: Publicar relatório
