@@ -36,7 +36,7 @@ ${BTN_CHECKOUT}         accessibility_id=Proceed To Checkout button
 
 *** Keywords ***
 Open Demo App
-    Open Application    ${REMOTE_URL}    &{CAPS}
+      Wait Until Keyword Succeeds    3x    10s    Open Application    ${REMOTE_URL}    &{CAPS}
     Wait Until Element Is Visible    ${PRODUCTS_SCREEN}    timeout=60s
 
 Close Demo App
