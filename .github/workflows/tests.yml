@@ -38,7 +38,7 @@ jobs:
         run: robot -d results -v BROWSER:headlesschrome web/tests
       - name: Publicar relatório
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: relatorio-web
           path: results/
